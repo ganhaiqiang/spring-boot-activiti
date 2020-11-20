@@ -10,9 +10,9 @@ import java.lang.annotation.Target;
 
 import com.active4j.hr.core.query.QueryCondition;
 
-
 /**
- * 标注实体的查询字段，用于自动生成查询条件   QueryWrapper
+ * 标注实体的查询字段，用于自动生成查询条件 QueryWrapper
+ * 
  * @author teli_
  *
  */
@@ -23,7 +23,7 @@ import com.active4j.hr.core.query.QueryCondition;
 public @interface QueryField {
 
 	String queryColumn();
-	
+
 	QueryCondition condition() default QueryCondition.eq;
-	
+
 }

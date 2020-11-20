@@ -27,10 +27,10 @@ import com.active4j.hr.core.redis.RedisPropertiesLoader;
  */
 @Configuration
 public class ShiroConfig {
-	
+
 	@Autowired
 	private RedisPropertiesLoader redisProperties;
-	
+
 	@Bean
 	public SecurityManager securityManager() {
 		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
@@ -40,7 +40,6 @@ public class ShiroConfig {
 		securityManager.setCacheManager(cacheManager());
 		return securityManager;
 	}
-
 
 	@Bean
 	public DefaultWebSessionManager sessionManager() {
@@ -99,7 +98,6 @@ public class ShiroConfig {
 		return authorizationAttributeSourceAdvisor;
 	}
 
-	
 	/**
 	 * 配置shiro redisManager，使用的是shiro-redis开源插件
 	 */
@@ -115,7 +113,6 @@ public class ShiroConfig {
 		redisManager.setDatabase(redisProperties.getDatabase());
 		return redisManager;
 	}
-	
 
 	@Bean
 	@ConditionalOnBean(RedisManager.class)

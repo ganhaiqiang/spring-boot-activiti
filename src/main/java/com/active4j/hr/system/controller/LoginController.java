@@ -21,19 +21,17 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @title LoginController.java
- * @time  2020年1月15日 下午2:06:06
+ * @time 2020年1月15日 下午2:06:06
  * @author 麻木神
  * @version 1.0
-*/
+ */
 @Controller
 @Slf4j
 public class LoginController {
-	
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	跳转到项目首页
+	 * @description 跳转到项目首页
 	 * @return String
 	 * @author 麻木神
 	 * @time 2020年1月15日 下午10:25:13
@@ -42,11 +40,10 @@ public class LoginController {
 	public String console(Model model) {
 		return "main/console";
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	跳转到项目首页
+	 * @description 跳转到项目首页
 	 * @return String
 	 * @author 麻木神
 	 * @time 2020年1月15日 下午10:25:13
@@ -55,11 +52,10 @@ public class LoginController {
 	public String index(Model model) {
 		return "main/main";
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	跳转到项目首页
+	 * @description 跳转到项目首页
 	 * @return String
 	 * @author 麻木神
 	 * @time 2020年1月15日 下午10:25:13
@@ -68,11 +64,10 @@ public class LoginController {
 	public String index2(Model model) {
 		return "main/main";
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	跳转到403
+	 * @description 跳转到403
 	 * @return String
 	 * @author 麻木神
 	 * @time 2020年1月15日 下午10:25:13
@@ -81,26 +76,23 @@ public class LoginController {
 	public String auth(Model model) {
 		return "common/403";
 	}
-	
 
 	/**
 	 * 
-	 * @description
-	 *  	跳转登录页面
+	 * @description 跳转登录页面
 	 * @return String
 	 * @author 麻木神
 	 * @time 2020年1月15日 下午2:09:06
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(Model model) {
-		
+
 		return "login/login";
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	登出
+	 * @description 登出
 	 * @params
 	 * @return String
 	 * @author guyp
@@ -112,7 +104,7 @@ public class LoginController {
 		ShiroUtils.logout();
 		return "login/login";
 	}
-	
+
 	/**
 	 * 登录
 	 * 
@@ -123,7 +115,7 @@ public class LoginController {
 	@Log(type = LogType.login, name = "用户登录", memo = "用户成功登录")
 	public AjaxJson loginAction(String userName, String password, String randCode) {
 		AjaxJson j = new AjaxJson();
-		
+
 		try {
 			// 后端校验
 			if (StringUtils.isEmpty(userName)) {
@@ -170,6 +162,6 @@ public class LoginController {
 		}
 
 		return j;
-		
+
 	}
 }

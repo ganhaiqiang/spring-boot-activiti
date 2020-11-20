@@ -37,23 +37,22 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @title SysFunctionController.java
- * @description 
-		  系统管理  菜单管理
- * @time  2020年1月16日 下午4:37:26
+ * @description 系统管理 菜单管理
+ * @time 2020年1月16日 下午4:37:26
  * @author 麻木神
  * @version 1.0
-*/
+ */
 @Controller
 @RequestMapping("/sys/menu")
 @Slf4j
-public class SysFunctionController extends BaseController{
+public class SysFunctionController extends BaseController {
 
 	@Autowired
 	private SysFunctionService sysFunctionService;
-	
+
 	@Autowired
 	private SysOperationService sysOperationService;
-	
+
 	/**
 	 * 菜单列表页面跳转
 	 * 
@@ -63,8 +62,7 @@ public class SysFunctionController extends BaseController{
 	public ModelAndView list() {
 		return new ModelAndView("system/function/functionList");
 	}
-	
-	
+
 	/**
 	 * 操作列表页面跳转
 	 * 
@@ -75,8 +73,7 @@ public class SysFunctionController extends BaseController{
 		request.setAttribute("functionId", functionId);
 		return new ModelAndView("system/operation/operationList");
 	}
-	
-	
+
 	/**
 	 * 菜单列表--树形结构
 	 */
@@ -92,31 +89,30 @@ public class SysFunctionController extends BaseController{
 		dataGrid.setTotalPage(1);
 		TagUtil.datagrid(response, dataGrid);
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	按钮表格的显示
+	 * @description 按钮表格的显示
 	 * @return void
 	 * @author 麻木神
 	 * @time 2020年1月19日 下午3:09:45
 	 */
 	@RequestMapping("/opdategrid")
 	public void opdategrid(SysOperationEntity sysOperationEntity, HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
-		if(StringUtils.isEmpty(sysOperationEntity.getFunctionId())) {
+		if (StringUtils.isEmpty(sysOperationEntity.getFunctionId())) {
 			sysOperationEntity.setFunctionId("-1");
 		}
-		
-		//拼接查询条件
+
+		// 拼接查询条件
 		QueryWrapper<SysOperationEntity> queryWrapper = QueryUtils.installQueryWrapper(sysOperationEntity, request.getParameterMap(), dataGrid);
-		
-		//执行查询
+
+		// 执行查询
 		IPage<SysOperationEntity> lstResult = sysOperationService.page(new Page<SysOperationEntity>(dataGrid.getPage(), dataGrid.getRows()), queryWrapper);
-		
-		//输出结果
+
+		// 输出结果
 		ResponseUtil.writeJson(response, dataGrid, lstResult);
 	}
-	
+
 	/**
 	 * 权限列表页面跳转
 	 * 
@@ -125,41 +121,40 @@ public class SysFunctionController extends BaseController{
 	@RequestMapping("/addorupdate")
 	public ModelAndView addorupdate(SysFunctionEntity function, HttpServletRequest req) {
 		ModelAndView view = new ModelAndView("system/function/function");
-		
-		//菜单的树形结构
+
+		// 菜单的树形结构
 		List<KeyValueModel> lstTrees = new ArrayList<KeyValueModel>();
 		List<SysFunctionEntity> lstParents = sysFunctionService.getParentFunctions();
-		if(null != lstParents && lstParents.size() > 0) {
-			for(SysFunctionEntity f : lstParents) {
+		if (null != lstParents && lstParents.size() > 0) {
+			for (SysFunctionEntity f : lstParents) {
 				KeyValueModel keyValue = new KeyValueModel();
 				keyValue.setKey(f.getName());
 				keyValue.setValue(f.getId());
 				lstTrees.add(keyValue);
-				//目前系统只要支持一级菜单和二级菜单，如果以后需要三级或者更多级菜单，取消下面注释
+				// 目前系统只要支持一级菜单和二级菜单，如果以后需要三级或者更多级菜单，取消下面注释
 				List<SysFunctionEntity> lstChildren = sysFunctionService.getChildFunctionsByParentId(f.getId());
 				getMenuTreeKeyValue(lstChildren, lstTrees, "　　");
 			}
 		}
 		view.addObject("lstTrees", lstTrees);
-		
-		//编辑 获取菜单
-		if(StringUtils.isNotEmpty(function.getId())) {
+
+		// 编辑 获取菜单
+		if (StringUtils.isNotEmpty(function.getId())) {
 			function = sysFunctionService.getById(function.getId());
 			view.addObject("function", function);
 		}
-		//是否有父级菜单
-		if(StringUtils.isNotEmpty(function.getParentId())) {
+		// 是否有父级菜单
+		if (StringUtils.isNotEmpty(function.getParentId())) {
 			function.setLevel(1);
 			view.addObject("function", function);
 		}
-		
-		
+
 		return view;
 	}
-	
-	
+
 	/**
 	 * 菜单保存
+	 * 
 	 * @return
 	 */
 	@RequestMapping("/save")
@@ -168,48 +163,47 @@ public class SysFunctionController extends BaseController{
 	public AjaxJson save(SysFunctionEntity function, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		try {
-			
-			if(0 == function.getLevel()) {
+
+			if (0 == function.getLevel()) {
 				function.setParentId(null);
 			}
-			
-			if(StringUtils.isNotEmpty(function.getParentId())) {
+
+			if (StringUtils.isNotEmpty(function.getParentId())) {
 				function.setLevel(sysFunctionService.getById(function.getParentId()).getLevel() + 1);
 			}
-			
-			if(StringUtils.isNotEmpty(function.getParentId()) && StringUtils.equals(function.getParentId(), function.getId())) {
+
+			if (StringUtils.isNotEmpty(function.getParentId()) && StringUtils.equals(function.getParentId(), function.getId())) {
 				j.setSuccess(false);
 				j.setMsg("上级目录不能选择自己，请重新选择");
 				return j;
 			}
-			
+
 			if (StringUtils.isNotEmpty(function.getId())) {
-				
+
 				SysFunctionEntity tmp = sysFunctionService.getById(function.getId());
 				MyBeanUtils.copyBeanNotNull2Bean(function, tmp);
-				if(0 == tmp.getLevel()) {
+				if (0 == tmp.getLevel()) {
 					tmp.setParentId(null);
 				}
 				sysFunctionService.saveOrUpdate(tmp);
-				
-			}else {
+
+			} else {
 				sysFunctionService.save(function);
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			log.error("保存菜单信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("保存菜单错误");
 			e.printStackTrace();
 		}
-		
-		
+
 		return j;
 	}
-	
-	
+
 	/**
 	 * 菜单删除
+	 * 
 	 * @return
 	 */
 	@RequestMapping("/del")
@@ -218,37 +212,38 @@ public class SysFunctionController extends BaseController{
 	public AjaxJson del(SysFunctionEntity function, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		try {
-			
-			if(StringUtils.isNotEmpty(function.getId())) {
-				//删除之前校验是否存在子菜单
+
+			if (StringUtils.isNotEmpty(function.getId())) {
+				// 删除之前校验是否存在子菜单
 				List<SysFunctionEntity> lstMenus = sysFunctionService.getChildMenusByMenu(function);
-				if(null != lstMenus && lstMenus.size() > 0) {
+				if (null != lstMenus && lstMenus.size() > 0) {
 					j.setSuccess(false);
 					j.setMsg("该菜单下存在子级菜单，不能直接删除");
 					return j;
 				}
-				
+
 				sysFunctionService.deleteMenu(function);
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			log.error("删除菜单信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("删除菜单错误");
 			e.printStackTrace();
 		}
-		
+
 		return j;
 	}
-	
+
 	/**
 	 * 获取菜单
+	 * 
 	 * @param lstMenus
 	 * @param lstTrees
 	 */
 	private void getMenuTreeKeyValue(List<SysFunctionEntity> lstMenus, List<KeyValueModel> lstTrees, String tag) {
-		if(null != lstMenus && lstMenus.size() > 0) {
-			for(SysFunctionEntity function : lstMenus) {
+		if (null != lstMenus && lstMenus.size() > 0) {
+			for (SysFunctionEntity function : lstMenus) {
 				KeyValueModel keyValue = new KeyValueModel();
 				keyValue.setKey(tag + function.getName());
 				keyValue.setValue(function.getId());
@@ -258,11 +253,10 @@ public class SysFunctionController extends BaseController{
 			}
 		}
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	跳转到新增编辑按钮页面
+	 * @description 跳转到新增编辑按钮页面
 	 * @return ModelAndView
 	 * @author 麻木神
 	 * @time 2020年1月29日 下午2:52:09
@@ -270,19 +264,19 @@ public class SysFunctionController extends BaseController{
 	@RequestMapping("/addorupdateop")
 	public ModelAndView addorupdateop(SysOperationEntity sysOperationEntity, HttpServletRequest req) {
 		ModelAndView view = new ModelAndView("system/function/operation");
-		
-		if(StringUtils.isNotEmpty(sysOperationEntity.getId())) {
+
+		if (StringUtils.isNotEmpty(sysOperationEntity.getId())) {
 			sysOperationEntity = sysOperationService.getById(sysOperationEntity.getId());
 			view.addObject("operation", sysOperationEntity);
 		}
-		
+
 		view.addObject("functionId", sysOperationEntity.getFunctionId());
 		return view;
 	}
-	
-	
+
 	/**
 	 * 操作录入
+	 * 
 	 * @param ids
 	 * @return
 	 */
@@ -292,31 +286,31 @@ public class SysFunctionController extends BaseController{
 	public AjaxJson saveop(SysOperationEntity operation, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		try {
-			
-			if(StringUtils.isEmpty(operation.getFunctionId())) {
+
+			if (StringUtils.isEmpty(operation.getFunctionId())) {
 				j.setSuccess(false);
 				j.setMsg("请选择相应菜单添加按钮");
 				return j;
 			}
-			
-			if(StringUtils.isEmpty(operation.getId())) {
+
+			if (StringUtils.isEmpty(operation.getId())) {
 				sysOperationService.save(operation);
-			}else {
+			} else {
 				SysOperationEntity tmp = sysOperationService.getById(operation.getId());
 				MyBeanUtils.copyBeanNotNull2Bean(operation, tmp);
-				sysOperationService.saveOrUpdate(tmp);		
+				sysOperationService.saveOrUpdate(tmp);
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			log.error("保存按钮信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("保存按钮错误");
 			e.printStackTrace();
 		}
-		
+
 		return j;
 	}
-	
+
 	/**
 	 * 删除操作
 	 * 
@@ -329,18 +323,18 @@ public class SysFunctionController extends BaseController{
 	public AjaxJson delop(SysOperationEntity operation, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		try {
-			
-			if(StringUtils.isNotEmpty(operation.getId())) {
+
+			if (StringUtils.isNotEmpty(operation.getId())) {
 				sysOperationService.removeById(operation.getId());
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			log.error("删除按钮信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("删除按钮错误");
 			e.printStackTrace();
 		}
-		
+
 		return j;
 	}
 }

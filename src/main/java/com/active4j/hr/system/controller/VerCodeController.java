@@ -22,20 +22,18 @@ import com.active4j.hr.core.shiro.ShiroUtils;
 /**
  * 
  * @title VerCodeController.java
- * @description 
-		  登录验证码生成
- * @time  2019年12月3日 上午10:14:41
+ * @description 登录验证码生成
+ * @time 2019年12月3日 上午10:14:41
  * @author chenxl
  * @version 1.0
  */
 @Controller
-public class VerCodeController implements Serializable{
+public class VerCodeController implements Serializable {
 	private static final long serialVersionUID = -1257987018545327308L;
-	
-	
+
 	@Autowired
 	private VerCodeProperties verCodeProperties;
-	
+
 	/**
 	 * 
 	 */
@@ -110,7 +108,7 @@ public class VerCodeController implements Serializable{
 
 		// 将认证码存入SESSION
 		ShiroUtils.setSessionValue(GlobalConstant.SESSION_KEY_OF_RAND_CODE, resultCode);
-		
+
 		// 图象生效
 		graphics.dispose();
 
@@ -192,6 +190,7 @@ enum RandCodeImageEnum {
 	 * 大写字符
 	 */
 	UPPER_CHAR("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
 	/**
 	 * 待生成的字符串
 	 */

@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.Data;
 
-
 /**
  * 验证码
+ * 
  * @author teli_
  *
  */
@@ -16,8 +16,7 @@ import lombok.Data;
 @Data
 public class VerCodeProperties {
 
-	
 	private int randCodeLength;
-	
+
 	private String randCodeType;
 }

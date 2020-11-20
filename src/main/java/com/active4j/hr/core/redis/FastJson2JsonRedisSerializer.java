@@ -8,7 +8,6 @@ import org.springframework.data.redis.serializer.SerializationException;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
-
 /**
  * @title FastJson2JsonRedisSerializer.java
  * @description 利用fastjson实现redis序列号

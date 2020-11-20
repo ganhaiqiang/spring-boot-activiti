@@ -36,20 +36,19 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @title SysDeptController.java
- * @description 
-		  系统管理  部门管理
- * @time  2020年1月29日 下午4:10:09
+ * @description 系统管理 部门管理
+ * @time 2020年1月29日 下午4:10:09
  * @author 麻木神
  * @version 1.0
-*/
+ */
 @Controller
 @RequestMapping("/sys/dept")
 @Slf4j
 public class SysDeptController {
-	
+
 	@Autowired
 	private SysDeptService sysDeptService;
-	
+
 	@Autowired
 	private SysUserService sysUserService;
 
@@ -62,8 +61,7 @@ public class SysDeptController {
 	public ModelAndView list() {
 		return new ModelAndView("system/depart/departList");
 	}
-	
-	
+
 	/**
 	 * 菜单列表--树形结构
 	 */
@@ -79,9 +77,10 @@ public class SysDeptController {
 		dataGrid.setTotalPage(1);
 		TagUtil.datagrid(response, dataGrid);
 	}
-	
+
 	/**
 	 * 跳转到部门的新增页面
+	 * 
 	 * @param depart
 	 * @param req
 	 * @return
@@ -89,14 +88,14 @@ public class SysDeptController {
 	@RequestMapping("/add")
 	public ModelAndView add(SysDeptEntity depart, HttpServletRequest req) {
 		ModelAndView view = new ModelAndView("system/depart/depart");
-		
-		//获取部门类型的数据字典
+
+		// 获取部门类型的数据字典
 		List<SysDicValueEntity> lstTypes = SystemUtils.getDictionaryLst("tsdepart");
 		view.addObject("types", lstTypes);
-		
+
 		return view;
 	}
-	
+
 	/**
 	 * 部门列表页面跳转
 	 * 
@@ -105,26 +104,25 @@ public class SysDeptController {
 	@RequestMapping("/update")
 	public ModelAndView update(SysDeptEntity depart, HttpServletRequest req) {
 		ModelAndView view = new ModelAndView("system/depart/depart");
-		
-		//获取部门类型的数据字典
+
+		// 获取部门类型的数据字典
 		List<SysDicValueEntity> lstTypes = SystemUtils.getDictionaryLst("tsdepart");
 		view.addObject("types", lstTypes);
-		
+
 		depart = sysDeptService.getById(depart.getId());
 		view.addObject("depart", depart);
-		
+
 		SysDeptEntity parentDept = sysDeptService.getById(depart.getParentId());
-		if(null != parentDept) {
+		if (null != parentDept) {
 			view.addObject("parentDepartName", parentDept.getName());
 		}
-		
+
 		return view;
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	部门保存
+	 * @description 部门保存
 	 * @return AjaxJson
 	 * @author 麻木神
 	 * @time 2020年2月1日 下午7:08:22
@@ -135,42 +133,42 @@ public class SysDeptController {
 	public AjaxJson save(SysDeptEntity depart, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
 		try {
-			if(StringUtils.isEmpty(depart.getParentId())) {
+			if (StringUtils.isEmpty(depart.getParentId())) {
 				depart.setLevel(0);
 				depart.setParentId(null);
-			}else {
+			} else {
 				SysDeptEntity parent = sysDeptService.getById(depart.getParentId());
 				depart.setLevel(parent.getLevel() + 1);
 			}
-			
-			if(StringUtils.isNotEmpty(depart.getParentId()) && StringUtils.equals(depart.getParentId(), depart.getId())) {
+
+			if (StringUtils.isNotEmpty(depart.getParentId()) && StringUtils.equals(depart.getParentId(), depart.getId())) {
 				j.setSuccess(false);
 				j.setMsg("上级部门不能选择自己，请重新选择");
 				return j;
 			}
-			
+
 			if (StringUtils.isNotEmpty(depart.getId())) {
-				//编辑保存
+				// 编辑保存
 				SysDeptEntity tmp = sysDeptService.getById(depart.getId());
 				MyBeanUtils.copyBeanNotNull2Bean(depart, tmp);
-				if(StringUtils.isEmpty(depart.getParentId())) {
+				if (StringUtils.isEmpty(depart.getParentId())) {
 					tmp.setParentId(null);
 				}
 				sysDeptService.saveOrUpdate(tmp);
-			}else {
-				//新增保存
+			} else {
+				// 新增保存
 				sysDeptService.save(depart);
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			log.error("保存部门信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("保存部门错误");
 			e.printStackTrace();
 		}
-		
+
 		return j;
 	}
-	
+
 	/**
 	 * 删除部门
 	 * 
@@ -181,59 +179,58 @@ public class SysDeptController {
 	@Log(type = LogType.del, name = "删除部门信息", memo = "删除了部门信息")
 	public AjaxJson del(SysDeptEntity depart, HttpServletRequest request) {
 		AjaxJson j = new AjaxJson();
-		
+
 		try {
-			if(StringUtils.isNotEmpty(depart.getId())) {
-				//查询部门下面的用户，存在用户则不能删除该部门
+			if (StringUtils.isNotEmpty(depart.getId())) {
+				// 查询部门下面的用户，存在用户则不能删除该部门
 				List<SysUserEntity> lstUsers = sysDeptService.getUsersByDept(depart.getId());
-				if(null != lstUsers && lstUsers.size() > 0) {
+				if (null != lstUsers && lstUsers.size() > 0) {
 					j.setSuccess(false);
 					j.setMsg("该部门下存在用户，不能直接删除");
 					return j;
 				}
-				
+
 				List<SysDeptEntity> lstDepts = sysDeptService.getChildDeptsByDeptId(depart.getId());
-				if(null != lstDepts && lstDepts.size() > 0) {
+				if (null != lstDepts && lstDepts.size() > 0) {
 					j.setSuccess(false);
 					j.setMsg("该部门下存在子部门，不能直接删除");
 					return j;
 				}
-			
-				//删除部门
+
+				// 删除部门
 				sysDeptService.removeById(depart.getId());
 			}
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			log.error("删除部门信息报错，错误信息:" + e.getMessage());
 			j.setSuccess(false);
 			j.setMsg("删除部门错误");
 			e.printStackTrace();
 		}
-		
+
 		return j;
 	}
-	
+
 	/**
 	 * 
-	 * @description
-	 *  	部门下人员列表
+	 * @description 部门下人员列表
 	 * @return void
 	 * @author 麻木神
 	 * @time 2020年2月1日 下午7:15:33
 	 */
 	@RequestMapping("/userDatagrid")
-	public void userDatagrid(SysUserEntity sysUserEntity,HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) { 
-		if(StringUtils.isEmpty(sysUserEntity.getDeptId())) {
+	public void userDatagrid(SysUserEntity sysUserEntity, HttpServletRequest request, HttpServletResponse response, DataGrid dataGrid) {
+		if (StringUtils.isEmpty(sysUserEntity.getDeptId())) {
 			sysUserEntity.setDeptId("-1");
 		}
-		
-		//拼接查询条件
+
+		// 拼接查询条件
 		QueryWrapper<SysUserEntity> queryWrapper = QueryUtils.installQueryWrapper(sysUserEntity, request.getParameterMap(), dataGrid);
-		
-		//执行查询
+
+		// 执行查询
 		IPage<SysUserEntity> lstResult = sysUserService.page(new Page<SysUserEntity>(dataGrid.getPage(), dataGrid.getRows()), queryWrapper);
-		
-		//输出结果
+
+		// 输出结果
 		ResponseUtil.writeJson(response, dataGrid, lstResult);
 	}
 }
